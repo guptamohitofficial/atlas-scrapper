@@ -6,6 +6,8 @@ from app.database import Database
 from app.cache import Cache
 from app.utils import Utils
 from app.logger import log
+from notification import Notification
+import config as settings
 import requests
 import time 
 
@@ -17,6 +19,7 @@ class Scraper:
         self.use_proxy = use_proxy
         self.utils = Utils(local_storage_path='saved_media')
         self.base_url = base_url
+        self.notification = Notification()
 
     def run(self) -> int:
         total_scraped = 0
@@ -30,6 +33,10 @@ class Scraper:
             if products:
                 log.debug("Parsing page")
                 total_scraped += self.process_products(products)
+                if settings.DEBUG:
+                    log.debug(f"Scrapping completed, {total_scraped} products scrapped")
+                else:
+                    self.notification.send_notification_everywhere(total_scraped)
         return total_scraped
     
     def scrape_page(self, url: str) -> List[Product]:

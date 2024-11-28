@@ -3,6 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import List
 from app.logger import log
+import config as settings
 
 class EmailClient:
     def __init__(self, smtp_server: str, port: int, username: str, password: str):
@@ -15,7 +16,7 @@ class EmailClient:
         if from_email is None:
             from_email = self.username
         message = MIMEMultipart()
-        message['From'] = "Atlas Stuff By Mohit Gupta <%s>" %from_email
+        message['From'] = "Atlys Stuff By Mohit Gupta <%s>" %from_email
         message['To'] = ','.join(to_emails)
         message['Subject'] = subject
         message.attach(MIMEText(body, 'plain'))
@@ -30,13 +31,18 @@ class EmailClient:
         except Exception as e:
             log.error(f"An error occurred: {e}")
 
-
-email_client = 
-
-# Details for sending the email
-subject = 'Test Email'
-body = 'This is a test email sent from Python.'
-to_emails = ['recipient1@example.com', 'recipient2@example.com']
-
-# Send the email
-email_client.send_email(subject, body, to_emails)
+    def publish_scrapping_count(self, count):
+        for user in settings.NOTIFICATION_USERS:
+            if user["is_active"]:
+                mail_body = f"""
+                Hi {user["name"]},
+                Mohit's atlys scrapper has scrapped {count} products.
+                Thanks!
+                Mohit Gupta
+                """
+                self.send_email(
+                    "Atlys Scrapper Results",
+                    mail_body
+                    [user["email"]],
+                    self.username
+                )
