@@ -1,12 +1,49 @@
-Run pip -r requirements.txt
-Run uvicorn main:app --reload
+## Setup Instructions
 
-After running the server use the given url in browser to trigger scrapper : `http://127.0.0.1:8000/scrape?token=atlys-mohit-fixed-token&limit=5&use_proxy=false`
+### Prerequisites
 
-`limit` can be any integer representing numbner of pages to be fetched
-`use_proxy` is `true` then proxy request will use (free proxy is very slow)
-both of these params can work otgether stating `condition 1 of the task`
+Before starting the application, make sure you have the necessary Python packages listed in `requirements.txt`. You can install these dependencies using `pip`.
 
-If application is running in DEBUG = true mode then no notifications will be release, count will only be logged as info and no data will be saved in db but will be saved in products.json file.
+### Installation and Running the Server
 
-If application is running in DEBUG = false, whatsapp and email notifications will be triggered if correct credentails are provided and products will be saved into sqlite db by default if other support DBs (postgresql, mysql, mariaDB, oracle) configs are not given in environment vars
+1. **Install Required Packages**  
+   Use the following command to install all necessary dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Start the FastAPI Server**  
+   Run the server using Uvicorn with the following command:
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+## Triggering the Scraper
+
+Once the server is running, you can trigger the web scraper through a web browser by visiting the URL:
+
+```
+http://127.0.0.1:8000/scrape?token=atlys-mohit-fixed-token&limit=5&use_proxy=false
+```
+
+### URL Parameters
+
+- **`token`**: Hard coded token value `atlys-mohit-fixed-token` is requeired. For simplicity to access from browser, token has to be added as query param only not in headers-Authentication.
+- **`limit`**: Specifies the number of pages to be fetched. It can be any integer.
+- **`use_proxy`**: A boolean parameter. If set to `true`, requests will be routed through a proxy server (note that free proxies may be slow).
+
+Both parameters can be used simultaneously to adjust the scraper's behavior according to your needs. This aligns with the "condition 1 of the task."
+
+## Application Behavior
+
+### Debug Mode
+
+The application's behavior differs based on whether it is operating in debug mode:
+
+- **DEBUG = true**:
+  - **Notifications**: No notifications will be triggered.
+  - **Data Storage**: Scraped data will not be saved in the database but will be written to a local JSON file named `products.json`.
+
+- **DEBUG = false**:
+  - **Notifications**: Both WhatsApp and email notifications will be triggered if valid credentials are provided.
+  - **Data Storage**: Products will be saved into an SQLite database by default. If configurations for other supported databases (PostgreSQL, MySQL, MariaDB, Oracle) are present in the environment variables, they will be used instead.

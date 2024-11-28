@@ -8,7 +8,7 @@ class Utils:
 
     def __init__(self, *args, **kwargs):
         self.local_storage_path = kwargs.get("local_storage_path")
-        self.products_file_name = "porducts.json"
+        self.products_file_name = "products.json"
 
     def check_proxied_ip(self, session) -> str:
         try:
