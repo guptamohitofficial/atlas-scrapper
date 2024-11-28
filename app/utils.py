@@ -1,12 +1,14 @@
 from urllib.parse import quote
 from app.logger import log
 import requests
+import json
 import os
 
 class Utils:
 
     def __init__(self, *args, **kwargs):
         self.local_storage_path = kwargs.get("local_storage_path")
+        self.products_file_name = "porducts.json"
 
     def check_proxied_ip(self, session) -> str:
         try:
@@ -38,3 +40,22 @@ class Utils:
         except requests.exceptions.RequestException as e:
             log.error("Error downloading image: %s" %str(e))
             return ""
+
+    def add_or_update_product_in_file(self, products)->None:
+        try:
+            with open(self.products_file_name, 'r') as file:
+                existing_products = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            existing_products = []
+        existing_products_dict = {prod['title']: prod for prod in existing_products}
+        for new_product in products:
+            if new_product['title'] in existing_products_dict:
+                existing_products_dict[new_product['title']].update(
+                    price=new_product['price'],
+                    image_url=new_product['image_url']
+                )
+            else:
+                existing_products_dict[new_product['title']] = new_product
+        existing_products = list(existing_products_dict.values())
+        with open(self.products_file_name, 'w') as file:
+            json.dump(existing_products, file, indent=4)

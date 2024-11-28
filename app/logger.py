@@ -13,11 +13,11 @@ def setup_logging():
     elif settings.LOGGER_LEVEL == "debug":
         log_level = logging.DEBUG
 
-    logger = logging.getLogger("Atlys-scrapper")
+    logger = logging.getLogger("atlys-scrapper")
     logger.setLevel(log_level)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(log_level)
-    file_handler = logging.FileHandler("Atlys-scrapper.log")
+    file_handler = logging.FileHandler("atlys-scrapper.log")
     file_handler.setLevel(log_level)
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

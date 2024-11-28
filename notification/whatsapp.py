@@ -2,6 +2,7 @@ import json
 import os
 import requests
 import config as settings
+from app.logger import log
 
 OPTS_FILE = "notification/data/whatsapp_opted_in_numbers.json"
 
@@ -23,7 +24,7 @@ class WhatsAppAPIService:
 
     def save_opted_in_number(self, phone_number: str) -> None:
         """Save an opted-in number to a local JSON file."""
-        current_opted_in = WhatsAppAPIService.load_opted_in_numbers()
+        current_opted_in = self.load_opted_in_numbers()
         current_opted_in.add(phone_number)
         with open(OPTS_FILE, "w") as file:
             json.dump(list(current_opted_in), file)
@@ -33,13 +34,10 @@ class WhatsAppAPIService:
 
         if len(user_phone) != 12:
             return False, "Invalid Phone Number"
-
-        is_opted_in = WhatsAppAPIService.check_opt_in_status(user_phone)
-
+        is_opted_in = self.check_opt_in_status(user_phone)
         if not is_opted_in:
-            if not WhatsAppAPIService.opt_in_user(user_phone):
+            if not self.opt_in_user(user_phone):
                 return False, "Opt-in Failed"
-
         data = {
             "channel": "whatsapp",
             "src.name": self.app_name,
@@ -52,7 +50,7 @@ class WhatsAppAPIService:
                 }
             ),
         }
-        endpoint = f"{self.base_endpoint}/msg"
+        endpoint = f"{self.base_endpoint}/template/msg"
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "apikey": self.key,
@@ -66,27 +64,31 @@ class WhatsAppAPIService:
 
     def check_opt_in_status(self, user_phone: str) -> bool:
         """Check if a phone number is already opted in."""
-        return user_phone in WhatsAppAPIService.load_opted_in_numbers()
+        return user_phone in self.load_opted_in_numbers()
 
     def opt_in_user(self, user_phone: str) -> bool:
         """Opt a user into WhatsApp notifications."""
         data = {"user": user_phone}
-        endpoint = f"{self.base_endpoint}/app/opt/in"
+        endpoint = f"{self.base_endpoint}/app/opt/in/{self.app_name}"
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "apikey": self.key,
         }
         response = requests.post(endpoint, data=data, headers=headers)
-        if response.status_code == 200:
-            WhatsAppAPIService.save_opted_in_number(user_phone)
+        if response.status_code < 300:
+            self.save_opted_in_number(user_phone)
             return True
         return False
 
-    def publish_scrapping_count(self, count):
-        for user in settings.NOTIFICATION_USERS:
-            if user["is_active"]:
-                self.opt_in_and_send_message(
-                    f"91{user['whatsapp']}",
-                    settings.WHATSAPP_API_TEMPLATE_ID_Atlys_SCRAPPER_NOTIFICATION,
-                    [user["name"], count],
-                )
+    def publish_scrapping_count(self, count: int) -> None:
+        log.debug("Sending whatsapp message to users")
+        if settings.WHATSAPP_API_KEY:
+            for user in settings.NOTIFICATION_USERS:
+                if user["is_active"]:
+                    print(self.opt_in_and_send_message(
+                        f"91{user['whatsapp']}",
+                        settings.WHATSAPP_API_TEMPLATE_ID_Atlys_SCRAPPER_NOTIFICATION,
+                        [user["name"], count],
+                    ))
+        else:
+            log.error("Whatsapp API key missing")

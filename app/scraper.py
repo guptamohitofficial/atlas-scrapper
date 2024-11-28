@@ -31,12 +31,11 @@ class Scraper:
                 url = f"{self.base_url}/page/{page}"
             products = self.scrape_page(url)
             if products:
-                log.debug("Parsing page")
                 total_scraped += self.process_products(products)
-                if settings.DEBUG:
-                    log.debug(f"Scrapping completed, {total_scraped} products scrapped")
-                else:
-                    self.notification.send_notification_everywhere(total_scraped)
+        if settings.DEBUG:
+            log.info(f"Scrapping completed, {total_scraped} products scrapped")
+        else:
+            self.notification.send_notification_everywhere(total_scraped)
         return total_scraped
     
     def scrape_page(self, url: str) -> List[Product]:
@@ -92,7 +91,10 @@ class Scraper:
         for product in products:
             cached_price = self.cache.get_price(product['title'])
             if cached_price is None or cached_price != product['title']:
-                self.db.add_or_update_product(product)
+                if settings.DEBUG:
+                    self.utils.add_or_update_product_in_file(products)
+                else:
+                    self.db.add_or_update_product(product)
                 self.cache.update_cache(product)
                 updated_count += 1
         return updated_count
