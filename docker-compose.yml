@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: .
+    volumes:
+      - .:/fast-api-app
+    environment:
+      WHATSAPP_API_SOURCE_PHONE: ""
+      WHATSAPP_API_APP_NAME: ""
+      WHATSAPP_API_KEY: ""
+      LOGGER_LEVEL: "debug"

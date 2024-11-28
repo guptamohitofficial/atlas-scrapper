@@ -18,6 +18,15 @@ Before starting the application, make sure you have the necessary Python package
    uvicorn main:app --reload
    ```
 
+2. **Start the FastAPI Server using Docker**  
+   Run the server using Docker with the following command:
+   ```bash
+   docker-compose build
+   ```
+   ```bash
+   docker-compose up
+   ```
+
 ## Triggering the Scraper
 
 Once the server is running, you can trigger the web scraper through a web browser by visiting the URL:
