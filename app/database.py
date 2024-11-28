@@ -1,27 +1,22 @@
-import json
+from peewee import IntegrityError
 from app.models import Product
+from app.logger import log
 
 class Database:
-    def __init__(self):
-        self.filepath = 'products.json'
-        self.load()
 
-    def load(self):
+    def add_or_update_product(self, product_data) -> Product:
+        """Add a new product or update an existing product by title."""
         try:
-            with open(self.filepath, 'r') as file:
-                self.data = json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            self.data = []
-
-    def save_product(self, product: Product):
-        for prod in self.data:
-            if prod['title'] == product.title:
-                prod.update(product.dict())
-                break
-        else:
-            self.data.append(product.dict())
-        self.save()
-
-    def save(self):
-        with open(self.filepath, 'w') as file:
-            json.dump(self.data, file, indent=4)
+            product, created = Product.get_or_create(
+                title=product_data['title'],
+                defaults=product_data
+            )
+            if not created:
+                query = Product.update(
+                    price=product_data['price'],
+                    image_url=product_data['image_url']
+                ).where(Product.title == product_data['title'])
+                query.execute()
+            return product
+        except IntegrityError as e:
+            log.error("Error with database operation: %s" %str(e))

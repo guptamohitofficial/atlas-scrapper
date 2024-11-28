@@ -1,12 +1,26 @@
-from pydantic import BaseModel, validator
+from peewee import Model, SqliteDatabase, PostgresqlDatabase, CharField, FloatField, IntegerField
+import config as settings
+
+if settings.DB_TYPE == 'sqlite':
+    db = SqliteDatabase(settings.DB_NAME)
+elif settings.DB_TYPE == 'postgresql':
+    db = PostgresqlDatabase(
+        settings.DB_NAME,
+        user=settings.DB_USER,
+        password=settings.DB_PASSWORD,
+        host=settings.DB_HOST
+    )
+else:
+    raise TypeError("Unsupported DB_TYPE")
+
+class BaseModel(Model):
+    class Meta:
+        database = db
 
 class Product(BaseModel):
-    title: str
-    price: float
-    image_url: str
+    title = CharField()
+    price = FloatField()
+    image_url = CharField()
 
-    @validator('price')
-    def price_must_be_positive(cls, price):
-        if price < 0:
-            raise ValueError('Price must be positive')
-        return price
+db.connect()
+db.create_tables([Product], safe=True)

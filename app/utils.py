@@ -1,22 +1,24 @@
 from urllib.parse import quote
+from app.logger import log
 import requests
 import os
 
 class Utils:
+
     def __init__(self, *args, **kwargs):
-        local_storage_path = kwargs.get("local_storage_path")
-    
+        self.local_storage_path = kwargs.get("local_storage_path")
+
     def check_proxied_ip(self, session) -> str:
         try:
             response = session.get(self.get_proxied_url('https://api.ipify.org?format=json'))
             response.raise_for_status()
             ip_info = response.text
-            print(ip_info.split('"ip":"')[1].split('"')[0])
+            log.debug(ip_info.split('"ip":"')[1].split('"')[0])
             return ip_info.split('"ip":"')[1].split('"')[0]
         except requests.exceptions.RequestException as e:
-            print(e)
+            log.debug("Failed to check ip error : %s" %str(e))
             return ""
-    
+
     def get_proxied_url(self, url: str) -> str:
         parsed_url = quote(url, safe='')
         return "https://api.scrapingant.com/v2/general?url=%s&x-api-key=7a5b3b4c1f054ef8b70fd5c2f2c1ae8a" %parsed_url
@@ -34,7 +36,5 @@ class Utils:
             absolute_path = os.path.abspath(save_path)
             return absolute_path
         except requests.exceptions.RequestException as e:
-            print(f"Error downloading image: {e}")
+            log.error("Error downloading image: %s" %str(e))
             return ""
-
-    

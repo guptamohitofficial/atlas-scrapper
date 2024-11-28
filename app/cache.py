@@ -7,4 +7,4 @@ class Cache:
         return self.price_cache.get(title)
 
     def update_cache(self, product):
-        self.price_cache[product.title] = product.price
+        self.price_cache[product['title']] = product['price']
