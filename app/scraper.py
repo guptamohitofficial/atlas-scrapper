@@ -23,19 +23,21 @@ class Scraper:
 
     def run(self) -> int:
         total_scraped = 0
+        created_scraped = 0
         for page in range(1, self.limit + 1):
-            log.debug("scrapping page number %d" %page)
+            log.debug("Scrapping page number %d" %page)
             if page == 1:
                 url = f"{self.base_url}"
             else:
                 url = f"{self.base_url}/page/{page}"
             products = self.scrape_page(url)
             if products:
-                total_scraped += self.process_products(products)
+                total_scraped += len(products)
+                created_scraped += self.process_products(products)
         if settings.DEBUG:
-            log.info(f"Scrapping completed, {total_scraped} products scrapped")
+            log.info(f"Scrapping completed, {total_scraped} products scrapped, {created_scraped} were newly created")
         else:
-            self.notification.send_notification_everywhere(total_scraped)
+            self.notification.send_notification_everywhere(total_scraped, created_scraped)
         return total_scraped
     
     def scrape_page(self, url: str) -> List[Product]:
@@ -89,12 +91,13 @@ class Scraper:
         """Process the list of products for updates and caching."""
         updated_count = 0
         for product in products:
+            count_to_update = 0
             cached_price = self.cache.get_price(product['title'])
             if cached_price is None or cached_price != product['title']:
                 if settings.DEBUG:
-                    self.utils.add_or_update_product_in_file(products)
+                    count_to_update = self.utils.add_or_update_product_in_file(product)
                 else:
-                    self.db.add_or_update_product(product)
+                    count_to_update = self.db.add_or_update_product(product)
                 self.cache.update_cache(product)
-                updated_count += 1
+                updated_count += count_to_update
         return updated_count

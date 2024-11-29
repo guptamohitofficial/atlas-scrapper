@@ -41,25 +41,27 @@ class Utils:
             log.error("Error downloading image: %s" %str(e))
             return ""
 
-    def add_or_update_product_in_file(self, products)->None:
+    def add_or_update_product_in_file(self, new_product: dict)->int:
         try:
             with open(self.products_file_name, 'r') as file:
                 existing_products = json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             existing_products = []
+        created_count = 0
         existing_products_dict = {prod['product_title']: prod for prod in existing_products}
-        for new_product in products:
-            if new_product['title'] in existing_products_dict:
-                existing_products_dict[new_product['title']].update(
-                    product_price=new_product['price'],
-                    path_to_image=new_product['image_url']
-                )
-            else:
-                existing_products_dict[new_product['title']] = {
-                    "product_title": new_product['title'],
-                    "product_price": new_product['price'],
-                    "path_to_image": new_product['image_url'],
-                }
+        if new_product['title'] in existing_products_dict:
+            existing_products_dict[new_product['title']].update(
+                product_price=new_product['price'],
+                path_to_image=new_product['image_url']
+            )
+        else:
+            created_count += 1
+            existing_products_dict[new_product['title']] = {
+                "product_title": new_product['title'],
+                "product_price": new_product['price'],
+                "path_to_image": new_product['image_url'],
+            }
         existing_products = list(existing_products_dict.values())
         with open(self.products_file_name, 'w') as file:
             json.dump(existing_products, file, indent=4)
+        return created_count

@@ -17,6 +17,6 @@ class Notification:
             settings.WHATSAPP_API_KEY
         )
 
-    def send_notification_everywhere(self, scrapped_products_count:int) -> None:
-        self.email_client.publish_scrapping_count(scrapped_products_count)
-        self.whatsapp_client.publish_scrapping_count(scrapped_products_count)
+    def send_notification_everywhere(self, scrapped_products_count: int, created_scraped: int) -> None:
+        self.email_client.publish_scrapping_count(scrapped_products_count, created_scraped)
+        self.whatsapp_client.publish_scrapping_count(scrapped_products_count, created_scraped)

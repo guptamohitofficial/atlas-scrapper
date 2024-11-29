@@ -80,15 +80,15 @@ class WhatsAppAPIService:
             return True
         return False
 
-    def publish_scrapping_count(self, count: int) -> None:
+    def publish_scrapping_count(self, count: int, created_scraped: int) -> None:
         log.debug("Sending whatsapp message to users")
         if settings.WHATSAPP_API_KEY:
             for user in settings.NOTIFICATION_USERS:
                 if user["is_active"]:
-                    print(self.opt_in_and_send_message(
+                    self.opt_in_and_send_message(
                         f"91{user['whatsapp']}",
                         settings.WHATSAPP_API_TEMPLATE_ID_Atlys_SCRAPPER_NOTIFICATION,
-                        [user["name"], count],
-                    ))
+                        [user["name"], f"{count} items, {created_scraped} saved as"],
+                    )
         else:
             log.error("Whatsapp API key missing")

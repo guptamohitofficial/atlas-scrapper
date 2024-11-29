@@ -34,11 +34,11 @@ class EmailClient:
         except Exception as e:
             log.error(f"An error occurred: {e}")
 
-    def publish_scrapping_count(self, count: int) -> None:
+    def publish_scrapping_count(self, count: int, created_scraped: int) -> None:
         log.debug("Sending emails to users")
         for user in settings.NOTIFICATION_USERS:
             if user["is_active"]:
-                mail_body = f"""Hi {user['name']},\nMohit's atlys scrapper has scrapped {str(count)} products.\nThanks!\nMohit Gupta"""
+                mail_body = f"""Hi {user['name']},\nMohit's atlys scrapper has scrapped {count} items, created {created_scraped} new products.\nThanks!\nMohit Gupta"""
                 self.send_email(
                     "Atlys Scrapper Results", mail_body, [user["email"]], self.username
                 )
